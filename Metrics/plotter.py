@@ -11,6 +11,7 @@ import re
 def pad_list(lst, target_length, pad_value=float('nan')):
     return lst + [pad_value] * (target_length - len(lst))
 
+
 def extract_info_from_file(filename, epochs=500):
     """
     Extracts training and validation loss and accuracy from a log file.
@@ -47,7 +48,7 @@ def extract_info_from_file(filename, epochs=500):
 # Load Data from Files
 # ======================
 
-model_name = 'MSCNN 7 Model'
+model_name = 'MSCNNAM 7 Model'
 datasets = ["MFPT", "XJTU"]
 optimizers_lr = [
     ('Adam', 0.001), ('Adam', 0.0001), ('Adam', 0.01), ('Adam', 0.1),
@@ -57,7 +58,7 @@ optimizers_lr = [
 # Dictionaries to store extracted data
 train_losses, val_losses, train_accs, val_accs = {}, {}, {}, {}
 
-base_path = "/Output"
+base_path = "C:\\Users\\alrif\\Desktop\\ThesisProject\\Output"
 
 # Placeholder for the data
 data = []
@@ -76,9 +77,9 @@ for dataset in datasets:
         for epoch in range(len(train_l)):
             data.append([dataset, optimizer, lr, epoch + 1, train_l[epoch], val_l[epoch], train_a[epoch], val_a[epoch]])
 
-
 # Convert the data to a DataFrame and save to CSV
-df = pd.DataFrame(data, columns=['Dataset', 'Optimizer', 'Learning Rate', 'Epoch', 'Train Loss', 'Validation Loss', 'Train Accuracy', 'Validation Accuracy'])
+df = pd.DataFrame(data, columns=['Dataset', 'Optimizer', 'Learning Rate', 'Epoch', 'Train Loss', 'Validation Loss',
+                                 'Train Accuracy', 'Validation Accuracy'])
 csv_path = "C:\\Users\\alrif\\Desktop\\ThesisProject\\Output\\model_name.csv"
 df.to_csv(csv_path, index=False)
 print(f"Data saved to {csv_path}")
@@ -122,10 +123,10 @@ def plot_combined(metric="loss", dataset="MFPT"):
     fig, axes = plt.subplots(1, 2, figsize=(20, 8))
     data_source = {
         "loss": (train_losses, val_losses),
-        "accuracy": (train_accs, val_accs)
+        "precision": (train_accs, val_accs)
     }
     train_data, val_data = data_source[metric]
-    legend_location = 'lower right' if metric == 'accuracy' else 'upper right'
+    legend_location = 'lower right' if metric == 'precision' else 'upper right'
     for idx, opt in enumerate(['Adam', 'SGD']):
         ax = axes[idx]
         for color_id, (optimizer, lr) in enumerate(optimizers_lr):
@@ -140,7 +141,7 @@ def plot_combined(metric="loss", dataset="MFPT"):
                         legend_loc=legend_location)
         # Limit y-axis for loss
         if metric == "loss":
-         ax.set_ylim(bottom=0, top=5)  # Set y-axis limits here
+            ax.set_ylim(bottom=0, top=5)  # Set y-axis limits here
         # Adding borders
         for _, spine in ax.spines.items():
             spine.set_visible(True)
@@ -150,7 +151,7 @@ def plot_combined(metric="loss", dataset="MFPT"):
     plt.show()
 
 
-def plot_accuracy_difference():
+def plot_precision_difference():
     fig, axes = plt.subplots(1, 2, figsize=(20, 8))
 
     for idx, dataset in enumerate(["MFPT", "XJTU"]):
@@ -162,7 +163,7 @@ def plot_accuracy_difference():
                     label=f'{optimizer} Optimizer with Learning Rate of {lr}')
 
         plot_aesthetics(ax, 'Epoch', 'Difference (Train - Validation)',
-                        f'Training and Validation Accuracies Difference on {dataset} Dataset',
+                        f'Training and Validation Precision Differences on {dataset} Dataset',
                         legend_loc='upper right')
 
         # Adding borders
@@ -179,8 +180,8 @@ def plot_accuracy_difference():
 # Execute Plotting
 # ================
 
-for metric in ["loss", "accuracy"]:
+for metric in ["loss", "precision"]:
     for dataset in ["MFPT", "XJTU"]:
         plot_combined(metric, dataset)
 
-plot_accuracy_difference()
+plot_precision_difference()
