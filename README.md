@@ -27,6 +27,8 @@ This project is structured to handle but not limited to the MFPT and XJTU datase
 
 - **MFPT Dataset**: [MFPT Dataset](https://www.mfpt.org/fault-data-sets/)
 - **XJTU Dataset**: [XJTU Dataset](https://biaowang.tech/xjtu-sy-bearing-datasets/)
+- **CWRU Dataset**: [CWRU Dataset](https://engineering.case.edu/bearingdatacenter/download-data-file)
+- **PU Dataset**: [PU Dataset](https://mb.uni-paderborn.de/en/kat/main-research/datacenter/bearing-datacenter/data-sets-and-download)
 - (To Be Updated)
 
 ## Results
