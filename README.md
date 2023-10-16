@@ -15,23 +15,19 @@ This repository contains the implementation of the Hierarchical Multiscale Convo
 
 ## Requirements
 To install the required libraries, run:
-\```
+```
 pip install -r requirements.txt
-\```
+```
 
 ## Usage
-1. To train the model:
-   \```
-   python train.py [options]
-   \```
 (To Be Updated)
 
 ## Datasets
 This project is structured to handle but not limited to the MFPT and XJTU datasets for fault diagnosis in rotating machinery.
 
-- **MFPT Dataset**: [MFPT Dataset][https://www.mfpt.org/fault-data-sets/]
-- **XJTU Dataset**: [XJTU Dataset][https://biaowang.tech/xjtu-sy-bearing-datasets/]
-(To Be Updated)
+- **MFPT Dataset**: [MFPT Dataset]("https://www.mfpt.org/fault-data-sets/")
+- **XJTU Dataset**: [XJTU Dataset]("https://biaowang.tech/xjtu-sy-bearing-datasets/")
+- (To Be Updated)
 
 ## Results
 (To Be Updated)
