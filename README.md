@@ -25,8 +25,8 @@ pip install -r requirements.txt
 ## Datasets
 This project is structured to handle but not limited to the MFPT and XJTU datasets for fault diagnosis in rotating machinery.
 
-- **MFPT Dataset**: [MFPT Dataset]("https://www.mfpt.org/fault-data-sets/")
-- **XJTU Dataset**: [XJTU Dataset]("https://biaowang.tech/xjtu-sy-bearing-datasets/")
+- **MFPT Dataset**: [MFPT Dataset](https://www.mfpt.org/fault-data-sets/)
+- **XJTU Dataset**: [XJTU Dataset](https://biaowang.tech/xjtu-sy-bearing-datasets/)
 - (To Be Updated)
 
 ## Results
