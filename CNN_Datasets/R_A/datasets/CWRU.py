@@ -2,12 +2,11 @@ import os
 import pandas as pd
 from scipy.io import loadmat
 from sklearn.model_selection import train_test_split
-from datasets.SequenceDatasets import dataset
+from datasets.SequenceDatasets import dataset as sequence_dataset
 from datasets.sequence_aug import *
 from tqdm import tqdm
 
 signal_size = 1024
-
 
 datasetname = ["12k Drive End Bearing Fault Data", "12k Fan End Bearing Fault Data", "48k Drive End Bearing Fault Data",
                "Normal Baseline Data"]
@@ -46,17 +45,17 @@ axis = ["_DE_time", "_FE_time", "_BA_time"]
 
 # generate Training Dataset and Testing Dataset
 def get_files(root, test=False):
-    '''
+    """
     This function is used to generate the final training set and test set.
     root:The location of the data set
     normalname:List of normal data
     dataname:List of failure data
-    '''
+    """
     data_root1 = os.path.join('/tmp', root, datasetname[3])
     data_root2 = os.path.join('/tmp', root, datasetname[0])
 
     path1 = os.path.join('/tmp', data_root1, normalname[0])  # 0->1797rpm ;1->1772rpm;2->1750rpm;3->1730rpm
-    data, lab = data_load(path1, axisname=normalname[0],label=0)  # nThe label for normal data is 0
+    data, lab = data_load(path1, axisname=normalname[0], label=0)  # nThe label for normal data is 0
 
     for i in tqdm(range(len(dataname1))):
         path2 = os.path.join('/tmp', data_root2, dataname1[i])
@@ -68,11 +67,11 @@ def get_files(root, test=False):
 
 
 def data_load(filename, axisname, label):
-    '''
+    """
     This function is mainly used to generate test data and training data.
     filename:Data location
     axisname:Select which channel's data,---->"_DE_time","_FE_time","_BA_time"
-    '''
+    """
     datanumber = axisname.split(".")
     if eval(datanumber[0]) < 100:
         realaxis = "X0" + datanumber[0] + axis[0]
@@ -92,42 +91,54 @@ def data_load(filename, axisname, label):
 
 
 def data_transforms(dataset_type="train", normlize_type="-1-1"):
-    transforms = {
-        'train': Compose([
+    if dataset_type == "train":
+        transforms = [
             Reshape(),
-            Normalize(normlize_type),
-            RandomAddGaussian(),
-            RandomScale(),
-            RandomStretch(),
-            RandomCrop(),
+            Normalize(type=normlize_type),
+            AddGaussianNoise(sigma=0.01, prob=1.0),  # Here the default sigma and prob values are kept. Modify if needed.
+            RandomJitter(sigma=0.005),  # Default sigma value is kept. Modify if needed.
+            RandomStretch(sigma=0.3),  # Default sigma value is kept. Modify if needed.
+            RandomTimeWarping(sigma=0.2),  # Default sigma value is kept. Modify if needed.
+            RandomDropout(dropout_prob=0.05),  # Default dropout_prob value is kept. Modify if needed.
+            RandomCrop(crop_len=20),  # Default crop_len value is kept. Modify if needed.
+            RandomFlip(),
+            RandomFill(fill_len=20, fill_type="mean"),  # Default values are kept. Modify if needed.
+            RandomShift(shift_range=10),  # Default shift_range value is kept. Modify if needed.
+            RandomFrequencyNoise(sigma=0.01),  # Default sigma value is kept. Modify if needed.
             Retype()
+        ]
+    else:
+        transforms = [
+            Reshape(),
+            Normalize(type=normlize_type),
+            Retype()
+        ]
 
-        ]),
-        'val': Compose([
-            Reshape(),
-            Normalize(normlize_type),
-            Retype()
-        ])
-    }
-    return transforms[dataset_type]
+    return Compose(transforms)
+
 
 class CWRU(object):
     num_classes = 10
     inputchannel = 1
 
-    def __init__(self, data_dir,normlizetype):
+    def __init__(self, data_dir, normlizetype):
         self.data_dir = data_dir
         self.normlizetype = normlizetype
 
-    def data_preprare(self, test=False):
+    def data_prepare(self, test=False):
+        list_data = get_files(self.data_dir)
 
-        list_data = get_files(self.data_dir, test)
-        if test:
-            test_dataset = dataset(list_data=list_data, test=True, transform=None)
-            return test_dataset
-        else:
-            data_pd = pd.DataFrame({"data": list_data[0], "label": list_data[1]})
-            train_pd, val_pd = train_test_split(data_pd, test_size=0.20, random_state=40, stratify=data_pd["label"])
-            train_dataset = dataset(list_data=train_pd, transform=data_transforms('train',self.normlizetype))
-            val_dataset = dataset(list_data=val_pd, transform=data_transforms('val',self.normlizetype))
-            return train_dataset, val_dataset
+        # Create the initial dataframe from the fetched data
+        data_df = pd.DataFrame({"data": list_data[0], "label": list_data[1]})
+
+        # First split: 70% train, 30% temp
+        train_df, temp_df = train_test_split(data_df, test_size=0.3, random_state=40, stratify=data_df["label"])
+
+        # Second split: 2/3 validation (20% of original), 1/3 test (10% of original)
+        val_df, test_df = train_test_split(temp_df, test_size=1 / 3, random_state=40, stratify=temp_df["label"])
+
+        train_dataset = sequence_dataset(list_data=train_df, transform=data_transforms('train', self.normalize_type))
+        val_dataset = sequence_dataset(list_data=val_df, transform=data_transforms('val', self.normalize_type))
+        test_dataset = sequence_dataset(list_data=test_df, transform=data_transforms('test', self.normalize_type))
+
+        return train_dataset, val_dataset, test_dataset
