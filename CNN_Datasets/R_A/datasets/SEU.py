@@ -1,5 +1,4 @@
 import os
-import numpy as np
 import pandas as pd
 from itertools import islice
 from sklearn.model_selection import train_test_split
