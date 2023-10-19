@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 from itertools import islice
 from sklearn.model_selection import train_test_split
@@ -104,20 +105,28 @@ def data_transforms(dataset_type="train", normlize_type="-1-1"):
     return Compose(transforms)
 
 
-def data_prepare(self, test=False):
-    list_data = get_files(self.data_dir)
+class SEU(object):
+    num_classes = 20
+    inputchannel = 1
 
-    # Create the initial dataframe from the fetched data
-    data_df = pd.DataFrame({"data": list_data[0], "label": list_data[1]})
+    def __init__(self, data_dir, normlizetype):
+        self.data_dir = data_dir
+        self.normlizetype = normlizetype
 
-    # First split: 70% train, 30% temp
-    train_df, temp_df = train_test_split(data_df, test_size=0.3, random_state=40, stratify=data_df["label"])
+    def data_prepare(self, test=False):
+        list_data = get_files(self.data_dir)
 
-    # Second split: 2/3 validation (20% of original), 1/3 test (10% of original)
-    val_df, test_df = train_test_split(temp_df, test_size=1 / 3, random_state=40, stratify=temp_df["label"])
+        # Create the initial dataframe from the fetched data
+        data_df = pd.DataFrame({"data": list_data[0], "label": list_data[1]})
 
-    train_dataset = sequence_dataset(list_data=train_df, transform=data_transforms('train', self.normalize_type))
-    val_dataset = sequence_dataset(list_data=val_df, transform=data_transforms('val', self.normalize_type))
-    test_dataset = sequence_dataset(list_data=test_df, transform=data_transforms('test', self.normalize_type))
+        # First split: 70% train, 30% temp
+        train_df, temp_df = train_test_split(data_df, test_size=0.3, random_state=40, stratify=data_df["label"])
 
-    return train_dataset, val_dataset, test_dataset
+        # Second split: 2/3 validation (20% of original), 1/3 test (10% of original)
+        val_df, test_df = train_test_split(temp_df, test_size=1 / 3, random_state=40, stratify=temp_df["label"])
+
+        train_dataset = sequence_dataset(list_data=train_df, transform=data_transforms('train', self.normalize_type))
+        val_dataset = sequence_dataset(list_data=val_df, transform=data_transforms('val', self.normalize_type))
+        test_dataset = sequence_dataset(list_data=test_df, transform=data_transforms('test', self.normalize_type))
+
+        return train_dataset, val_dataset, test_dataset
